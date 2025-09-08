@@ -6,10 +6,4 @@
  * Remark：
  */
 
-package main
-
-import "fmt"
-
-func main() {
-	fmt.Println("Hello Echo")
-}
+package echo

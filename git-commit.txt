@@ -1,0 +1,14 @@
+9.09 封装优化切片方法
+
+- Add 在切片的指定索引位置插入元素
+- Delete 从切片中删除指定索引位置的元素
+- FilterDelete 删除切片中满足条件的元素
+- 数值函数
+- Max 返回切片中的最大值
+- Min 返回切片中的最小值
+- Sum 计算切片所有元素的总和
+- 包含判断函数
+- Contains/ContainsFunc 判断 src 里面是否存在 dst
+- ContainsAny/ContainsAnyFunc 判断 src 里面是否存在 dst 中的任何一个元素
+- ContainsAll/ContainsAllFunc 判断 src 里面是否存在 dst 中的所有元素
+- toMap 将切片转换为 map 用于高效查找
