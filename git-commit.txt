@@ -1,14 +1,12 @@
-9.09 封装优化切片方法
+9.12 封装优化切片方法
 
-- Add 在切片的指定索引位置插入元素
-- Delete 从切片中删除指定索引位置的元素
-- FilterDelete 删除切片中满足条件的元素
-- 数值函数
-- Max 返回切片中的最大值
-- Min 返回切片中的最小值
-- Sum 计算切片所有元素的总和
-- 包含判断函数
-- Contains/ContainsFunc 判断 src 里面是否存在 dst
-- ContainsAny/ContainsAnyFunc 判断 src 里面是否存在 dst 中的任何一个元素
-- ContainsAll/ContainsAllFunc 判断 src 里面是否存在 dst 中的所有元素
-- toMap 将切片转换为 map 用于高效查找
+新增和优化了以下切片操作方法：
+
+- 差集函数
+- DiffSet 差集，只支持 comparable 类型（已去重，顺序不确定）
+- DiffSetFunc 差集，支持自定义相等函数（已去重，顺序不确定）
+- 查找函数
+- Find 查找第一个满足条件的元素
+- FindAll 查找所有满足条件的元素
+- map方法
+- deduplicateFunc 使用自定义相等函数对切片进行去重

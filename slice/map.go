@@ -21,3 +21,37 @@ func toMap[T comparable](src []T) map[T]struct{} {
 	}
 	return dataMap
 }
+
+// deduplicateFunc 使用自定义相等函数对切片进行去重
+// 参数：
+// 需要去重的切片
+// 自定义相等判断函数
+// 返回值：
+// 去重后的切片，保留原始顺序中第一次出现的元素
+func deduplicateFunc[T any](data []T, equal equalFunc[T]) []T {
+	if len(data) == 0 {
+		return data
+	}
+
+	// 使用一个切片记录唯一元素
+	unique := make([]T, 0, len(data))
+
+	// 使用双重循环但优化比较次数
+	for i, v := range data {
+		found := false
+
+		// 只检查前面的元素
+		for j := 0; j < i; j++ {
+			if equal(data[j], v) {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			unique = append(unique, v)
+		}
+	}
+
+	return unique
+}
