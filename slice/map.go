@@ -22,6 +22,23 @@ func toMap[T comparable](src []T) map[T]struct{} {
 	return dataMap
 }
 
+// deduplicate 对切片进行去重处理，返回不包含重复元素的新切片
+// 参数：
+// 待去重的原始切片
+// 返回值：
+// 去重后的新切片（元素顺序不保证与原始切片一致）
+func deduplicate[T comparable](data []T) []T {
+	dataMap := toMap[T](data)
+
+	var newData = make([]T, 0, len(dataMap))
+
+	for key := range dataMap {
+		newData = append(newData, key)
+	}
+
+	return newData
+}
+
 // deduplicateFunc 使用自定义相等函数对切片进行去重
 // 参数：
 // 需要去重的切片
