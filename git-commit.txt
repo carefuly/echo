@@ -2,15 +2,17 @@
 
 新增和优化了以下切片操作方法：
 
-- 索引查找函数
-- Index 返回和 dst 相等的第一个元素下标
-- IndexFunc 返回 match 返回 true 的第一个下标
-- LastIndex 返回和 dst 相等的最后一个元素下标
-- LastIndexFunc 返回和 dst 相等的最后一个元素下标
-- IndexAll 返回和 dst 相等的所有元素的下标
-- IndexAllFunc 返回和 match 返回 true 的所有元素的下标
-- 交集函数
-- IntersectSet 计算两个切片的交集（只支持 comparable 类型）
-- IntersectSetFunc 使用自定义相等函数计算两个切片的交集（支持任意类型）
+- 翻转函数
+- Reverse 创建一个与原切片顺序相反的新切片
+- ReverseSelf 原地反转切片元素顺序。
+- 对称差集函数
+- SymmetricDiffSet 计算两个切片的对称差集（已去重）
+- SymmetricDiffSetFunc 计算两个切片的对称差集（已去重）
+- 并集函数
+- UnionSet 计算两个切片的并集（已去重）
+- UnionSetFunc 计算两个切片的并集（已去重）
 - map方法
-- deduplicate 对切片进行去重处理，返回不包含重复元素的新切片
+- FilterMap 对切片元素进行过滤和转换
+- Map 将切片元素转换为新类型
+- ToMap 将切片转换为映射 [Key]Ele
+- ToMapV 将切片转换为映射 [Key]Val
