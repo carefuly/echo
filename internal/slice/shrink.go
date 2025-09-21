@@ -50,7 +50,7 @@ func Shrink[T any](src []T) []T {
 // shrink: 是否需要执行缩容操作
 func calCapacity(cap, len int) (newCap int, shrink bool) {
 	// 小切片不缩容
-	if cap < smallCapacityThreshold {
+	if cap <= smallCapacityThreshold {
 		return cap, false
 	}
 
