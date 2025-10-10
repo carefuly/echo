@@ -1,108 +1,182 @@
-## carefuly-echo
+## careful-echo
 
-Go 通用工具库。本文档聚焦 `list` 包（通用 List 接口与三种实现）：
-- `ArrayList[T]`：基于切片的高性能可变数组，支持自动缩容
-- `ConcurrentList[T]`：为任意 `List[T]` 提供读写锁包装，线程安全
-- `CopyOnWriteArrayList[T]`：写时复制，读不加锁，适合读多写少
+Go 通用工具库。本文档聚焦以下四个包：
+- `tuple`：泛型元组（当前提供 `Pair[K,V]`）
+- `stringx`：字符串/字节零拷贝转换（不安全）
+- `randx`：高性能随机字符串生成
+- `bean`：Option 模式的泛型工具
 
 ### 安装
 
 ```bash
-go get github.com/carefuly/carefuly-echo
+go get github.com/carefuly/careful-echo
 ```
 
-### 引用
+### tuple（元组）
 
-```go
-import (
-	"github.com/carefuly/carefuly-echo/list"
-)
-```
+包路径：`github.com/carefuly/careful-echo/tuple/pair`
 
-### List 接口
+- **类型**：`Pair[K any, V any]`
+  - 字段：`Key K`，`Value V`
+  - 方法：
+    - `func (p *Pair[K,V]) String() string`
+    - `func (p *Pair[K,V]) Split() (K, V)`
+  - 构造：`func NewPair[K any, V any](key K, value V) Pair[K,V]`
 
-`list` 包对外暴露统一接口 `List[T]`（下述为精简说明）：
-
-```go
-// 仅示意：索引越界返回错误，AsSlice 每次返回新切片
-Get(index int) (T, error)
-Append(ts ...T) error
-Add(index int, t T) error
-Set(index int, t T) error
-Delete(index int) (T, error)
-Len() int
-Cap() int
-Range(fn func(index int, t T) error) error
-AsSlice() []T
-```
-
-### 实现与特性
-
-- ArrayList[T]
-  - 基于切片的封装，追加/插入/删除均保持与原生切片一致的语义（越界报错）
-  - 删除后自动缩容（避免长期占用过大容量）：
-    - 容量 > 2048 且长度 < 容量一半：缩容至原容量的 5/8（向下取整）
-    - 64 < 容量 ≤ 2048 且长度 ≤ 容量的 1/4：缩容至原容量的一半
-    - 容量 ≤ 64：不缩容
-  - `AsSlice` 每次返回全新切片，永不返回 `nil`
-
-- ConcurrentList[T]
-  - 为任意 `List[T]` 提供线程安全包装
-  - 读操作（`Get/Len/Cap/Range/AsSlice`）加读锁，写操作（`Append/Add/Set/Delete`）加写锁
-
-- CopyOnWriteArrayList[T]
-  - 写时复制：写操作复制底层数组再修改，读操作不加锁
-  - 适合读多写少、遍历频繁的场景
-  - `AsSlice` 返回副本；`Delete` 不做“缩容”，每次分配恰当长度
-
-### 快速上手
+示例：
 
 ```go
 package main
 
 import (
 	"fmt"
-	"github.com/carefuly/carefuly-echo/list"
+	"github.com/carefuly/careful-echo/tuple/pair"
 )
 
 func main() {
-	// 1) ArrayList：常规可变数组
-	a := list.NewArrayList[int](0)
-	_ = a.Append(1, 2, 3)          // [1 2 3]
-	_ = a.Add(1, 9)                // [1 9 2 3]
-	_ = a.Set(2, 5)                // [1 9 5 3]
-	v, _ := a.Delete(1)            // v=9, a=[1 5 3]，必要时触发缩容
-	fmt.Println(v, a.AsSlice())
-
-	// 2) ConcurrentList：线程安全包装
-	cl := &list.ConcurrentList[int]{List: a}
-	_ = cl.Append(100)
-	fmt.Println(cl.Len(), cl.AsSlice())
-
-	// 3) CopyOnWriteArrayList：读多写少
-	cow := list.NewCopyOnWriteArrayList[int]()
-	_ = cow.Append(7, 8, 9)
-	_ = cow.Add(1, 88)
-	fmt.Println(cow.AsSlice())
+	p := pair.NewPair("id", 123)
+	fmt.Println(p.String()) // 形如：<"id", 123>
+	k, v := p.Split()
+	fmt.Println(k, v)
 }
 ```
 
-### 错误与边界
+### stringx（不安全零拷贝转换）
 
-- 所有按下标访问/修改/删除的方法在越界时返回错误（错误文案示例：`echo: 下标超出范围，长度 %d, 下标 %d`）
-- `Range` 迭代时：当回调返回错误即中断并返回该错误
-- `AsSlice`：无元素时返回长度、容量均为 0 的新切片（非 `nil`）
+包路径：`github.com/carefuly/careful-echo/stringx`
 
-### 选型建议
+- `func UnsafeToBytes(val string) []byte`
+  - 将 `string` 转为 `[]byte`，零拷贝，不会分配新内存
+- `func UnsafeToString(val []byte) string`
+  - 将 `[]byte` 转为 `string`，零拷贝
 
-- 纯本地单线程或轻并发读写：优先 `ArrayList[T]`
-- 多并发读写：用 `ConcurrentList[T]{List: yourList}` 包装
-- 读多写少、写入频率低：考虑 `CopyOnWriteArrayList[T]`
+重要注意：
+- 确保参与转换的 `string` 与 `[]byte` 生命周期足够长；不要在转换后释放或修改其底层存储
+- 确保长度/容量一致，避免越界
+- 不要修改转换后的视图（它们可能共享同一块内存）
 
-### 测试概览
+示例（仅在明确理解风险时使用）：
 
-- 覆盖 `Get/Append/Add/Set/Delete/Len/Cap/Range/AsSlice` 行为
-- `ArrayList` 缩容规则包含逻辑用例与边界用例（如 64、2048、2049 等容量阈值）
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/carefuly/careful-echo/stringx"
+)
+
+func main() {
+	s := "hello"
+	bs := stringx.UnsafeToBytes(s) // 零拷贝视图
+	fmt.Println(len(bs), cap(bs))
+
+	b := []byte{'a', 'b'}
+	s2 := stringx.UnsafeToString(b) // 零拷贝视图
+	fmt.Println(s2)
+}
+```
+
+### randx（随机字符串）
+
+包路径：`github.com/carefuly/careful-echo/randx`
+
+- 类型与字符集：
+  - `type Type int`
+  - 标志位：
+    - `TypeDigit`（数字）
+    - `TypeLowerCase`（小写字母）
+    - `TypeUpperCase`（大写字母）
+    - `TypeSpecial`（特殊符号）
+    - `TypeMixed = TypeDigit | TypeUpperCase | TypeLowerCase | TypeSpecial`
+  - 预置字符集：`CharsetDigit/LowerCase/UpperCase/Special`
+
+- 生成函数：
+  - `func RandCode(length int, typ Type) (string, error)`
+    - 基于类型组合快速生成；`length < 0` 返回错误；`length == 0` 返回空串
+    - `typ` 超过 `TypeMixed` 返回错误
+  - `func RandStrByCharset(length int, charset string) (string, error)`
+    - 自定义字符集；`charset` 为空返回错误
+
+实现细节：
+- 使用位段缓存（按位掩码从 `rand.Int63()` 中多次取用），减少随机源调用次数
+
+示例：
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/carefuly/careful-echo/randx"
+)
+
+func main() {
+	code, _ := randx.RandCode(8, randx.TypeMixed)
+	fmt.Println(code)
+
+	// 自定义字符集
+	onlyHex, _ := randx.RandStrByCharset(16, "0123456789abcdef")
+	fmt.Println(onlyHex)
+}
+```
+
+错误：
+- `echo:长度必须大于等于0`（length < 0）
+- `echo:不支持的类型`（`typ` 超范围或字符集为空）
+
+### bean（Option 模式）
+
+包路径：`github.com/carefuly/careful-echo/bean/option`
+
+- `type Option[T any] func(*T)`：无错误的配置项
+- `func Apply[T any](t *T, opts ...Option[T])`：依次应用所有 `Option`
+- `type OptionErr[T any] func(*T) error`：带错误的配置项
+- `func ApplyErr[T any](t *T, opts ...OptionErr[T]) error`：遇错即停并返回
+
+示例：
+
+```go
+package main
+
+import (
+	"errors"
+	"fmt"
+	"github.com/carefuly/careful-echo/bean/option"
+)
+
+type Server struct {
+	Addr string
+	TLS  bool
+}
+
+func WithAddr(addr string) option.Option[Server] {
+	return func(s *Server) { s.Addr = addr }
+}
+
+func WithTLS(enabled bool) option.Option[Server] {
+	return func(s *Server) { s.TLS = enabled }
+}
+
+func WithAddrNonEmpty(addr string) option.OptionErr[Server] {
+	return func(s *Server) error {
+		if addr == "" { return errors.New("addr empty") }
+		s.Addr = addr
+		return nil
+	}
+}
+
+func main() {
+	// 无错版本
+	s := Server{}
+	option.Apply(&s, WithAddr(":8080"), WithTLS(true))
+	fmt.Printf("%+v\n", s)
+
+	// 带错版本
+	s2 := Server{}
+	_ = option.ApplyErr(&s2, WithAddrNonEmpty(":9090"))
+	fmt.Printf("%+v\n", s2)
+}
+```
 
 ### 许可证
 

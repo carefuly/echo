@@ -9,8 +9,8 @@
 package list
 
 import (
-	"github.com/carefuly/carefuly-echo/internal/errs"
-	"github.com/carefuly/carefuly-echo/internal/slice"
+	"github.com/carefuly/careful-echo/internal/errs"
+	"github.com/carefuly/careful-echo/internal/slice"
 )
 
 var (

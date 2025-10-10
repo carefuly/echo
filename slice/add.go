@@ -8,7 +8,7 @@
 
 package slice
 
-import "github.com/carefuly/carefuly-echo/internal/slice"
+import "github.com/carefuly/careful-echo/internal/slice"
 
 // Add 在切片的指定索引位置插入元素
 // 参数：

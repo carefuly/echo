@@ -8,7 +8,7 @@
 
 package slice
 
-import echo "github.com/carefuly/carefuly-echo"
+import echo "github.com/carefuly/careful-echo"
 
 // Max 返回切片中的最大值
 // 参数：

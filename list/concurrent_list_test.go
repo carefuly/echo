@@ -11,7 +11,7 @@ package list
 import (
 	"errors"
 	"fmt"
-	"github.com/carefuly/carefuly-echo/internal/errs"
+	"github.com/carefuly/careful-echo/internal/errs"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

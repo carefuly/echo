@@ -1,4 +1,4 @@
-module github.com/carefuly/carefuly-echo
+module github.com/carefuly/careful-echo
 
 go 1.23
 

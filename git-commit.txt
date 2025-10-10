@@ -1,15 +1,14 @@
-9.23 封装优化list方法
+10.10 新增Go通用工具库等多种方法
 
-新增了以下list针对切片添加线程安全列表实现操作方法：
+主要新增了tuple、stringx、bean和randx四个包
 
-- ConcurrentList
-- 使用读写锁实现细粒度锁定
-- 适用于通用的并发访问场景
-- CopyOnWriteArrayList
-- 采用写时复制模式
-- 为读主导的工作负载优化
-- 提供原子性的快照保证
-- 两个实现都完成了一下规范
-- 完整实现了 List 接口
-- 提供了完整的线程安全保证
-- 包含完整的错误处理机制
+- UnsafeToBytes
+- 将 string 转换为 []byte，但不复制底层数据（零复制）
+- UnsafeToString
+- 将 []byte 转换为 string，但不复制底层数据（零复制）
+- RandCode
+- 根据传入的长度和类型生成随机字符串
+- RandStrByCharset
+- 根据传入的长度和字符集生成随机字符串
+- Option 模式
+- OptionErr 带错误的模式

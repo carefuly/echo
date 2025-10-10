@@ -8,7 +8,7 @@
 
 package slice
 
-import "github.com/carefuly/carefuly-echo/internal/errs"
+import "github.com/carefuly/careful-echo/internal/errs"
 
 // Delete 从切片中删除指定索引位置的元素
 // 参数：
